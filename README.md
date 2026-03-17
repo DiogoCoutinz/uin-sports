@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# UIN Sports
 
-TODO: Document your project here
+Plataforma de equipamentos desportivos — desenvolvido por Flowzi.

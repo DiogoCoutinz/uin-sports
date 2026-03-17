@@ -32,10 +32,8 @@ function AdminSidebar() {
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarContent className="bg-sidebar">
         {/* Logo */}
-        <div className="p-4 flex items-center gap-2">
-          <div className="w-8 h-8 bg-sidebar-primary rounded-sm flex items-center justify-center flex-shrink-0">
-            <span className="text-sidebar-primary-foreground font-display text-xs">U</span>
-          </div>
+        <div className={`flex items-center ${collapsed ? 'justify-center p-3' : 'gap-2 p-4'}`}>
+          <img src="/favicon.png" alt="UIN Sports" className="w-8 h-8 rounded-full flex-shrink-0" />
           {!collapsed && <span className="font-display text-sidebar-foreground text-sm tracking-wider">BACKOFFICE</span>}
         </div>
 
