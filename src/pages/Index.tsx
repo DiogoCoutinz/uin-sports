@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { ArrowRight, ShoppingCart, Menu, ArrowDown } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { ArrowRight, ShoppingCart, Menu } from 'lucide-react';
 import { products } from '@/data/mockData';
 import Footer from '@/components/layout/Footer';
 import CartSidebar from '@/components/layout/CartSidebar';
@@ -9,24 +9,6 @@ import ScrollReveal from '@/components/ScrollReveal';
 import { useRef, useState } from 'react';
 
 const ease = [0.16, 1, 0.3, 1] as const;
-
-
-/* ── Animated counter ── */
-function Counter({ value, suffix = '' }: { value: string; suffix?: string }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-  return (
-    <motion.span
-      ref={ref}
-      initial={{ opacity: 0, y: 12 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, ease }}
-      className="inline-block"
-    >
-      {value}{suffix}
-    </motion.span>
-  );
-}
 
 /* ── Product card ── */
 function ProductCard({ product, index }: { product: typeof products[0]; index: number }) {
@@ -72,14 +54,6 @@ export default function Index() {
   const { totalItems, setIsOpen } = useCart();
   const [mobileNav, setMobileNav] = useState(false);
 
-  /* Hero parallax */
-  const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroTextY = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const heroImgY = useTransform(scrollYProgress, [0, 1], [0, -60]);
-  const heroImgScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
-
   /* Showroom parallax */
   const showroomRef = useRef<HTMLElement>(null);
   const { scrollYProgress: showroomP } = useScroll({ target: showroomRef, offset: ['start end', 'end start'] });
@@ -90,177 +64,42 @@ export default function Index() {
       <CartSidebar />
 
       {/* ═══════════════════════════════════════════════
-          HERO — split layout, jersey image right
+          FIXED NAV — always on top
       ═══════════════════════════════════════════════ */}
-      <section ref={heroRef} className="relative min-h-[100dvh] flex flex-col">
-        {/* Video bg — brighter, more visible */}
-        <div className="absolute inset-0">
-          <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50">
-            <source src="/kling.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-secondary/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-secondary via-transparent to-secondary/30" />
-        </div>
-
-        {/* Nav */}
-        <header className="relative z-30">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3">
-              <img src="/image copy.png" alt="UIN Sports" className="h-8" />
-              <span className="font-display text-white text-sm tracking-[0.06em]">SPORTS</span>
-            </Link>
-            <div className="flex items-center gap-8">
-              <nav className="hidden md:flex items-center gap-8">
-                {[{ label: 'Sobre', href: '/sobre' }, { label: 'Loja', href: '/loja' }, { label: 'Contactos', href: '/contactos' }].map(l => (
-                  <Link key={l.href} to={l.href} className="text-[13px] text-white/40 hover:text-white transition-colors duration-300 tracking-wide">{l.label}</Link>
-                ))}
-              </nav>
-              <button onClick={() => setIsOpen(true)} className="relative p-2 text-white/40 hover:text-white transition-colors">
-                <ShoppingCart className="w-[18px] h-[18px]" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] bg-white text-secondary text-[9px] font-bold rounded-full flex items-center justify-center">{totalItems}</span>
-                )}
-              </button>
-              <button onClick={() => setMobileNav(!mobileNav)} className="md:hidden p-2 text-white/40"><Menu className="w-5 h-5" /></button>
-            </div>
-          </div>
-          {mobileNav && (
-            <div className="md:hidden border-t border-white/[0.06] bg-secondary/95 backdrop-blur-xl">
-              <nav className="max-w-[1400px] mx-auto px-6 py-5 flex flex-col gap-4">
-                {[{ label: 'Sobre', href: '/sobre' }, { label: 'Loja', href: '/loja' }, { label: 'Contactos', href: '/contactos' }].map(l => (
-                  <Link key={l.href} to={l.href} onClick={() => setMobileNav(false)} className="text-sm text-white/50 hover:text-white transition-colors">{l.label}</Link>
-                ))}
-              </nav>
-            </div>
-          )}
-        </header>
-
-        {/* Hero split content */}
-        <div className="relative z-10 flex-1 flex items-center">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-12 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-              {/* Left — text */}
-              <motion.div style={{ opacity: heroOpacity, y: heroTextY }}>
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2, duration: 0.8, ease }}
-                  className="flex items-center gap-3 mb-6"
-                >
-                  <div className="w-8 h-[2px] bg-white/30" />
-                  <p className="text-white/40 text-[11px] font-medium tracking-[0.3em] uppercase">
-                    Equipamentos sublimados
-                  </p>
-                </motion.div>
-
-                <motion.h1
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 1, ease }}
-                  className="font-display text-[clamp(2.8rem,6vw,5rem)] leading-[1] tracking-tight text-white mb-6"
-                >
-                  Para cada marca,
-                  <br />
-                  <span className="text-white/70">há um herói.</span>
-                </motion.h1>
-
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7, duration: 0.8, ease }}
-                  className="text-white/45 text-[16px] leading-relaxed max-w-md mb-10"
-                >
-                  Design exclusivo e qualidade superior para clubes em Portugal, África e PALOP. Do conceito à entrega.
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.9, duration: 0.7, ease }}
-                  className="flex flex-wrap gap-3"
-                >
-                  <Link to="/loja">
-                    <span className="group inline-flex items-center gap-2.5 bg-white text-secondary px-7 py-3.5 text-[12px] font-semibold tracking-[0.06em] rounded-full hover:bg-white/90 transition-colors duration-300">
-                      Explorar loja
-                      <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-                    </span>
-                  </Link>
-                  <Link to="/contactos">
-                    <span className="inline-flex items-center border border-white/15 text-white/60 px-7 py-3.5 text-[12px] font-semibold tracking-[0.06em] rounded-full hover:border-white/30 hover:text-white transition-all duration-300">
-                      Pedir orçamento
-                    </span>
-                  </Link>
-                </motion.div>
-              </motion.div>
-
-              {/* Right — jersey image */}
-              <motion.div
-                style={{ y: heroImgY, scale: heroImgScale }}
-                className="hidden lg:flex justify-end"
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9, y: 40 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 1.2, ease }}
-                  className="relative"
-                >
-                  <img
-                    src="/1773934634864-shhr8snalp.jpg"
-                    alt="Camisola sublimada UIN Sports"
-                    className="w-[480px] rounded-3xl shadow-2xl shadow-black/30"
-                  />
-                  {/* Glow behind image */}
-                  <div className="absolute -inset-20 bg-white/[0.03] rounded-full blur-3xl -z-10" />
-                </motion.div>
-              </motion.div>
-            </div>
+      <header className="fixed top-0 left-0 right-0 z-50">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3">
+            <img src="/image copy.png" alt="UIN Sports" className="h-8" />
+            <span className="font-display text-white text-sm tracking-[0.06em]">SPORTS</span>
+          </Link>
+          <div className="flex items-center gap-8">
+            <nav className="hidden md:flex items-center gap-8">
+              {[{ label: 'Sobre', href: '/sobre' }, { label: 'Loja', href: '/loja' }, { label: 'Contactos', href: '/contactos' }].map(l => (
+                <Link key={l.href} to={l.href} className="text-[13px] text-white/40 hover:text-white transition-colors duration-300 tracking-wide">{l.label}</Link>
+              ))}
+            </nav>
+            <button onClick={() => setIsOpen(true)} className="relative p-2 text-white/40 hover:text-white transition-colors">
+              <ShoppingCart className="w-[18px] h-[18px]" />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] bg-white text-secondary text-[9px] font-bold rounded-full flex items-center justify-center">{totalItems}</span>
+              )}
+            </button>
+            <button onClick={() => setMobileNav(!mobileNav)} className="md:hidden p-2 text-white/40"><Menu className="w-5 h-5" /></button>
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.8 }}
-          className="relative z-10 flex justify-center pb-8"
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-            className="text-white/15"
-          >
-            <ArrowDown className="w-5 h-5" />
-          </motion.div>
-        </motion.div>
-
-        {/* Stats — bottom */}
-        <div className="relative z-10 border-t border-white/[0.06]">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-12 py-6 grid grid-cols-4 gap-4">
-            {[
-              { n: '200+', l: 'Clubes parceiros' },
-              { n: '10K+', l: 'Equipamentos' },
-              { n: '12', l: 'Anos' },
-              { n: '9', l: 'Países' },
-            ].map((s, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2 + i * 0.1, duration: 0.6, ease }}
-                className="text-center"
-              >
-                <p className="font-display text-lg lg:text-xl text-white/60 leading-none">
-                  <Counter value={s.n} />
-                </p>
-                <p className="text-[9px] text-white/15 tracking-[0.15em] uppercase mt-1.5">{s.l}</p>
-              </motion.div>
-            ))}
+        {mobileNav && (
+          <div className="md:hidden border-t border-white/[0.06] bg-secondary/95 backdrop-blur-xl">
+            <nav className="max-w-[1400px] mx-auto px-6 py-5 flex flex-col gap-4">
+              {[{ label: 'Sobre', href: '/sobre' }, { label: 'Loja', href: '/loja' }, { label: 'Contactos', href: '/contactos' }].map(l => (
+                <Link key={l.href} to={l.href} onClick={() => setMobileNav(false)} className="text-sm text-white/50 hover:text-white transition-colors">{l.label}</Link>
+              ))}
+            </nav>
           </div>
-        </div>
-      </section>
+        )}
+      </header>
 
       {/* ═══════════════════════════════════════════════
-          SCROLL REVEAL — cinematic dolly-in sequence
+          SCROLL REVEAL — cinematic dolly-in (IS the hero)
       ═══════════════════════════════════════════════ */}
       <ScrollReveal />
 
