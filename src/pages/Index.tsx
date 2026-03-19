@@ -1,476 +1,495 @@
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { ArrowRight, ShoppingCart } from 'lucide-react';
-import { products, clubs } from '@/data/mockData';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { ArrowRight, ShoppingCart, Menu, ArrowDown } from 'lucide-react';
+import { products } from '@/data/mockData';
 import Footer from '@/components/layout/Footer';
 import CartSidebar from '@/components/layout/CartSidebar';
 import { useCart } from '@/contexts/CartContext';
+import ScrollReveal from '@/components/ScrollReveal';
 import { useRef, useState } from 'react';
 
-/* ─────────────────────────────────────────────
-   Dual-direction club marquee — two rows
-   moving in opposite directions for energy
-───────────────────────────────────────────── */
-function ClubMarquee() {
-  const names = clubs.map(c => c.name);
-  const doubled = [...names, ...names];
+const ease = [0.16, 1, 0.3, 1] as const;
 
+
+/* ── Animated counter ── */
+function Counter({ value, suffix = '' }: { value: string; suffix?: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
   return (
-    <div className="py-4 bg-secondary overflow-hidden select-none">
-      {/* Forward row */}
-      <div className="flex gap-12 whitespace-nowrap animate-marquee w-max mb-3">
-        {doubled.map((name, i) => (
-          <span key={`fwd-${i}`} className="flex items-center gap-12">
-            <span className="font-display text-[2rem] text-white/[0.06] uppercase tracking-wider">
-              {name}
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-primary/20" />
-          </span>
-        ))}
-      </div>
-      {/* Reverse row */}
-      <div className="flex gap-12 whitespace-nowrap animate-marquee-reverse w-max">
-        {doubled.map((name, i) => (
-          <span key={`rev-${i}`} className="flex items-center gap-12">
-            <span className="font-display text-[2rem] text-white/[0.06] uppercase tracking-wider">
-              {name}
-            </span>
-            <span className="w-1.5 h-1.5 bg-primary/30 rotate-45" />
-          </span>
-        ))}
-      </div>
-    </div>
+    <motion.span
+      ref={ref}
+      initial={{ opacity: 0, y: 12 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, ease }}
+      className="inline-block"
+    >
+      {value}{suffix}
+    </motion.span>
   );
 }
 
-/* ─────────────────────────────────────────────
-   Product card — tall aspect, layered reveal
-───────────────────────────────────────────── */
+/* ── Product card ── */
 function ProductCard({ product, index }: { product: typeof products[0]; index: number }) {
   return (
-    <Link
-      to={`/produto/${product.id}`}
-      className="group block relative flex-shrink-0 w-[280px] sm:w-[300px] lg:w-[320px]"
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.7, delay: index * 0.12, ease }}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: index * 0.1, type: 'spring', stiffness: 80, damping: 20 }}
-        className="relative overflow-hidden aspect-[3/4.2]"
-      >
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-[1.06]"
-        />
-        {/* gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        {/* hover accent line */}
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-        {/* content */}
-        <div className="absolute bottom-0 left-0 right-0 p-5">
-          <p className="text-primary/70 text-[10px] font-semibold tracking-[0.3em] uppercase mb-1.5">
+      <Link to={`/produto/${product.id}`} className="group block">
+        <div className="relative overflow-hidden rounded-2xl bg-white/[0.03]">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full aspect-[3/4] object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-500 flex items-end justify-center pb-8 opacity-0 group-hover:opacity-100">
+            <span className="bg-white text-secondary px-5 py-2.5 text-[11px] font-semibold tracking-[0.08em] rounded-full translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
+              Ver produto
+            </span>
+          </div>
+        </div>
+        <div className="pt-4">
+          <p className="text-[10px] tracking-[0.2em] text-white/20 uppercase font-medium">
             {product.clubName}
           </p>
-          <p className="text-white font-medium text-sm leading-snug">{product.name}</p>
-          <p className="text-white font-display text-2xl mt-1.5 tracking-wide">
-            {product.price.toFixed(2)}<span className="text-lg ml-0.5">€</span>
+          <h3 className="text-white/70 text-[15px] mt-1 leading-snug group-hover:text-white transition-colors duration-300">
+            {product.name}
+          </h3>
+          <p className="text-white/35 text-sm mt-2 tabular-nums">
+            {product.price.toFixed(2)} €
           </p>
         </div>
-        {/* index number */}
-        <div className="absolute top-4 right-4 font-display text-white/[0.07] text-6xl leading-none select-none">
-          {String(index + 1).padStart(2, '0')}
-        </div>
-      </motion.div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 }
 
-/* ─────────────────────────────────────────────
-   Scroll progress indicator — thin line
-───────────────────────────────────────────── */
-function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
-
-  return (
-    <motion.div
-      style={{ scaleX }}
-      className="fixed top-0 left-0 right-0 h-[2px] bg-primary z-50 origin-left"
-    />
-  );
-}
-
-/* ─────────────────────────────────────────────
-   Main page
-───────────────────────────────────────────── */
+/* ── Main page ── */
 export default function Index() {
-  const featuredProducts = products.filter(p => p.id !== 'p4').slice(0, 6);
+  const featured = products.slice(0, 4);
   const { totalItems, setIsOpen } = useCart();
+  const [mobileNav, setMobileNav] = useState(false);
 
-  // Hero parallax
+  /* Hero parallax */
   const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress: heroProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroTextY = useTransform(heroProgress, [0, 1], [0, 150]);
-  const heroOpacity = useTransform(heroProgress, [0, 0.6], [1, 0]);
-  const heroVideoScale = useTransform(heroProgress, [0, 1], [1, 1.15]);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const heroTextY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const heroImgY = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  const heroImgScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
-  // About section parallax
-  const aboutRef = useRef<HTMLElement>(null);
-  const { scrollYProgress: aboutProgress } = useScroll({ target: aboutRef, offset: ['start end', 'end start'] });
-  const aboutImgY = useTransform(aboutProgress, [0, 1], [60, -60]);
-  const aboutImgScale = useTransform(aboutProgress, [0, 0.5, 1], [1.1, 1, 1.05]);
-
-  // Horizontal scroll for products
-  const productsRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const checkScroll = () => {
-    const el = productsRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 10);
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
-  };
-
-  const scrollProducts = (direction: 'left' | 'right') => {
-    const el = productsRef.current;
-    if (!el) return;
-    const amount = direction === 'left' ? -340 : 340;
-    el.scrollBy({ left: amount, behavior: 'smooth' });
-  };
+  /* Showroom parallax */
+  const showroomRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: showroomP } = useScroll({ target: showroomRef, offset: ['start end', 'end start'] });
+  const showroomImgY = useTransform(showroomP, [0, 1], [-30, 30]);
 
   return (
-    <div className="min-h-[100dvh] bg-secondary overflow-x-hidden">
-      <ScrollProgress />
+    <div className="bg-secondary text-white">
       <CartSidebar />
 
-      {/* ══════════════════════════════════════════
-          HERO — Full-screen video + floating kick.png
-      ══════════════════════════════════════════ */}
-      <section ref={heroRef} className="relative min-h-[92dvh] flex flex-col justify-end overflow-hidden">
-        {/* Video background — cropped top 10% to hide artifacts */}
-        <motion.div style={{ scale: heroVideoScale }} className="absolute inset-0 -top-[10%] h-[110%]">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover object-[center_60%]"
-          >
+      {/* ═══════════════════════════════════════════════
+          HERO — split layout, jersey image right
+      ═══════════════════════════════════════════════ */}
+      <section ref={heroRef} className="relative min-h-[100dvh] flex flex-col">
+        {/* Video bg — brighter, more visible */}
+        <div className="absolute inset-0">
+          <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50">
             <source src="/kling.mp4" type="video/mp4" />
           </video>
-          {/* layered overlays for depth */}
-          <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/60 to-secondary/30" />
-          <div className="absolute inset-0 bg-gradient-to-r from-secondary/80 via-transparent to-transparent" />
-        </motion.div>
+          <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/70 to-secondary/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-secondary via-transparent to-secondary/30" />
+        </div>
 
-        {/* Noise texture */}
-        <div className="fixed inset-0 opacity-[0.025] pointer-events-none z-[60]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%270 0 256 256%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.85%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E")' }} />
-
-        {/* ── Floating nav ── */}
-        <div className="absolute top-0 left-0 right-0 z-20">
-          <div className="max-w-[1400px] mx-auto px-6 sm:px-8 h-20 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 group">
-              <img src="/favicon.png" alt="UIN Sports" className="w-9 h-9 rounded-full transition-transform duration-300 group-hover:scale-110" />
-              <span className="font-display text-white text-xl tracking-[0.15em]">UIN SPORTS</span>
+        {/* Nav */}
+        <header className="relative z-30">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-3">
+              <img src="/image copy.png" alt="UIN Sports" className="h-8" />
+              <span className="font-display text-white text-sm tracking-[0.06em]">SPORTS</span>
             </Link>
-
             <div className="flex items-center gap-8">
-              <nav className="hidden sm:flex items-center gap-8">
-                {[
-                  { label: 'Sobre', href: '/sobre' },
-                  { label: 'Loja', href: '/loja' },
-                  { label: 'Contactos', href: '/contactos' },
-                ].map(link => (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    className="text-[13px] font-medium text-white/40 hover:text-primary transition-colors duration-300 tracking-wider uppercase"
-                  >
-                    {link.label}
-                  </Link>
+              <nav className="hidden md:flex items-center gap-8">
+                {[{ label: 'Sobre', href: '/sobre' }, { label: 'Loja', href: '/loja' }, { label: 'Contactos', href: '/contactos' }].map(l => (
+                  <Link key={l.href} to={l.href} className="text-[13px] text-white/40 hover:text-white transition-colors duration-300 tracking-wide">{l.label}</Link>
                 ))}
               </nav>
-              <button
-                onClick={() => setIsOpen(true)}
-                className="relative p-2.5 text-white/40 hover:text-primary transition-colors duration-300 active:scale-95"
-              >
-                <ShoppingCart className="w-5 h-5" />
+              <button onClick={() => setIsOpen(true)} className="relative p-2 text-white/40 hover:text-white transition-colors">
+                <ShoppingCart className="w-[18px] h-[18px]" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {totalItems}
-                  </span>
+                  <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] bg-white text-secondary text-[9px] font-bold rounded-full flex items-center justify-center">{totalItems}</span>
                 )}
               </button>
+              <button onClick={() => setMobileNav(!mobileNav)} className="md:hidden p-2 text-white/40"><Menu className="w-5 h-5" /></button>
+            </div>
+          </div>
+          {mobileNav && (
+            <div className="md:hidden border-t border-white/[0.06] bg-secondary/95 backdrop-blur-xl">
+              <nav className="max-w-[1400px] mx-auto px-6 py-5 flex flex-col gap-4">
+                {[{ label: 'Sobre', href: '/sobre' }, { label: 'Loja', href: '/loja' }, { label: 'Contactos', href: '/contactos' }].map(l => (
+                  <Link key={l.href} to={l.href} onClick={() => setMobileNav(false)} className="text-sm text-white/50 hover:text-white transition-colors">{l.label}</Link>
+                ))}
+              </nav>
+            </div>
+          )}
+        </header>
+
+        {/* Hero split content */}
+        <div className="relative z-10 flex-1 flex items-center">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-12 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+              {/* Left — text */}
+              <motion.div style={{ opacity: heroOpacity, y: heroTextY }}>
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.8, ease }}
+                  className="flex items-center gap-3 mb-6"
+                >
+                  <div className="w-8 h-[2px] bg-white/30" />
+                  <p className="text-white/40 text-[11px] font-medium tracking-[0.3em] uppercase">
+                    Equipamentos sublimados
+                  </p>
+                </motion.div>
+
+                <motion.h1
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 1, ease }}
+                  className="font-display text-[clamp(2.8rem,6vw,5rem)] leading-[1] tracking-tight text-white mb-6"
+                >
+                  Para cada marca,
+                  <br />
+                  <span className="text-white/70">há um herói.</span>
+                </motion.h1>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7, duration: 0.8, ease }}
+                  className="text-white/45 text-[16px] leading-relaxed max-w-md mb-10"
+                >
+                  Design exclusivo e qualidade superior para clubes em Portugal, África e PALOP. Do conceito à entrega.
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9, duration: 0.7, ease }}
+                  className="flex flex-wrap gap-3"
+                >
+                  <Link to="/loja">
+                    <span className="group inline-flex items-center gap-2.5 bg-white text-secondary px-7 py-3.5 text-[12px] font-semibold tracking-[0.06em] rounded-full hover:bg-white/90 transition-colors duration-300">
+                      Explorar loja
+                      <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                    </span>
+                  </Link>
+                  <Link to="/contactos">
+                    <span className="inline-flex items-center border border-white/15 text-white/60 px-7 py-3.5 text-[12px] font-semibold tracking-[0.06em] rounded-full hover:border-white/30 hover:text-white transition-all duration-300">
+                      Pedir orçamento
+                    </span>
+                  </Link>
+                </motion.div>
+              </motion.div>
+
+              {/* Right — jersey image */}
+              <motion.div
+                style={{ y: heroImgY, scale: heroImgScale }}
+                className="hidden lg:flex justify-end"
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 1.2, ease }}
+                  className="relative"
+                >
+                  <img
+                    src="/1773934634864-shhr8snalp.jpg"
+                    alt="Camisola sublimada UIN Sports"
+                    className="w-[480px] rounded-3xl shadow-2xl shadow-black/30"
+                  />
+                  {/* Glow behind image */}
+                  <div className="absolute -inset-20 bg-white/[0.03] rounded-full blur-3xl -z-10" />
+                </motion.div>
+              </motion.div>
             </div>
           </div>
         </div>
 
-        {/* Hero content */}
+        {/* Scroll indicator */}
         <motion.div
-          style={{ opacity: heroOpacity, y: heroTextY }}
-          className="relative z-10 max-w-[1400px] mx-auto px-6 sm:px-8 pb-16 sm:pb-20 pt-32"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 0.8 }}
+          className="relative z-10 flex justify-center pb-8"
         >
-          {/* Accent tag */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3, type: 'spring', stiffness: 60 }}
-            className="flex items-center gap-3 mb-8"
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+            className="text-white/15"
           >
-            <div className="w-8 h-[2px] bg-primary" />
-            <p className="text-primary text-[11px] font-semibold tracking-[0.4em] uppercase">
-              Equipamentos desportivos
-            </p>
+            <ArrowDown className="w-5 h-5" />
           </motion.div>
-
-          {/* Main headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, type: 'spring', stiffness: 40, damping: 15 }}
-            className="font-display text-[clamp(3.2rem,12vw,11rem)] leading-[0.87] tracking-[-0.02em] text-white mb-10 max-w-[900px]"
-          >
-            PARA CADA
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary/80 to-primary/60">
-              MARCA,
-            </span>{' '}
-            HA
-            <br />
-            UM HEROI.
-          </motion.h1>
-
-          {/* CTA row */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, type: 'spring', stiffness: 50 }}
-            className="flex flex-col sm:flex-row gap-3"
-          >
-            <Link to="/loja">
-              <span className="group inline-flex items-center gap-3 bg-primary text-white px-8 py-4 font-semibold text-[13px] tracking-[0.2em] hover:bg-primary/85 transition-all duration-300 active:scale-[0.98]">
-                EXPLORAR LOJA
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </span>
-            </Link>
-            <Link to="/contactos">
-              <span className="inline-flex items-center gap-3 border border-white/15 text-white/80 px-8 py-4 font-semibold text-[13px] tracking-[0.2em] hover:border-white/30 hover:text-white transition-all duration-300 active:scale-[0.98]">
-                PEDIR ORCAMENTO
-              </span>
-            </Link>
-          </motion.div>
-
         </motion.div>
-      </section>
 
-      {/* Stats bar — outside hero so it scrolls normally */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.1 }}
-        className="bg-secondary"
-      >
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 py-5 sm:py-6">
-          <div className="flex justify-center gap-10 sm:gap-14 lg:gap-20">
+        {/* Stats — bottom */}
+        <div className="relative z-10 border-t border-white/[0.06]">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-12 py-6 grid grid-cols-4 gap-4">
             {[
-              { value: '200+', label: 'Clubes' },
-              { value: '10K+', label: 'Equipamentos' },
-              { value: '12', label: 'Anos' },
+              { n: '200+', l: 'Clubes parceiros' },
+              { n: '10K+', l: 'Equipamentos' },
+              { n: '12', l: 'Anos' },
+              { n: '9', l: 'Países' },
             ].map((s, i) => (
-              <div key={i} className="text-center">
-                <p className="font-display text-2xl sm:text-4xl lg:text-5xl text-white leading-none tracking-wide">{s.value}</p>
-                <p className="text-[9px] sm:text-[10px] text-white/25 tracking-[0.3em] uppercase mt-1 sm:mt-1.5">{s.label}</p>
-              </div>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 + i * 0.1, duration: 0.6, ease }}
+                className="text-center"
+              >
+                <p className="font-display text-lg lg:text-xl text-white/60 leading-none">
+                  <Counter value={s.n} />
+                </p>
+                <p className="text-[9px] text-white/15 tracking-[0.15em] uppercase mt-1.5">{s.l}</p>
+              </motion.div>
             ))}
           </div>
         </div>
-      </motion.div>
+      </section>
 
-      {/* ══════════════════════════════════════════
-          CLUB MARQUEE — Dual direction
-      ══════════════════════════════════════════ */}
-      <ClubMarquee />
+      {/* ═══════════════════════════════════════════════
+          SCROLL REVEAL — cinematic dolly-in sequence
+      ═══════════════════════════════════════════════ */}
+      <ScrollReveal />
 
-      {/* ══════════════════════════════════════════
-          ABOUT — Asymmetric split with kick.png
-      ══════════════════════════════════════════ */}
-      <section ref={aboutRef} className="relative py-14 lg:py-20 overflow-hidden">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-6 items-center">
-            {/* Image column — takes 7 cols */}
+      {/* ═══════════════════════════════════════════════
+          CAPABILITIES — flat-lay image + text side by side
+      ═══════════════════════════════════════════════ */}
+      <section className="py-24 lg:py-32 border-t border-white/[0.04]">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Image */}
             <motion.div
-              className="lg:col-span-7 relative"
-              initial={{ opacity: 0, x: -50 }}
+              initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ type: 'spring', stiffness: 40, damping: 18 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.8, ease }}
+              className="relative"
             >
-              <div className="relative overflow-hidden aspect-[4/3] lg:aspect-[16/11]">
-                <motion.img
-                  style={{ y: aboutImgY, scale: aboutImgScale }}
-                  src="/kick.png"
-                  alt="Football action"
-                  className="w-full h-full object-cover"
-                />
-                {/* overlay tint */}
-                <div className="absolute inset-0 bg-gradient-to-r from-secondary/40 via-transparent to-secondary/20" />
-              </div>
-              {/* Floating accent block */}
-              <div className="absolute -bottom-4 -right-4 lg:-bottom-6 lg:-right-6 w-24 h-24 lg:w-32 lg:h-32 border-2 border-primary/20" />
-              {/* Year badge */}
-              <div className="absolute top-6 left-6 bg-primary/90 backdrop-blur-sm px-4 py-2">
-                <p className="font-display text-white text-lg tracking-wider">DESDE 2013</p>
-              </div>
+              <img
+                src="/1773934771998-mc9pymd9il8.jpg"
+                alt="Processo de design — camisolas sublimadas e paletas de cor"
+                className="w-full rounded-2xl"
+              />
+              <div className="absolute -inset-4 bg-white/[0.02] rounded-3xl -z-10 blur-2xl" />
             </motion.div>
 
-            {/* Text column — takes 5 cols */}
+            {/* Text + features */}
             <motion.div
-              className="lg:col-span-5 lg:pl-6"
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ type: 'spring', stiffness: 40, damping: 18, delay: 0.15 }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 0.7, delay: 0.1, ease }}
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-6 h-[2px] bg-primary" />
-                <p className="text-primary text-[11px] font-semibold tracking-[0.35em] uppercase">Quem somos</p>
+                <div className="w-6 h-[2px] bg-white/15" />
+                <p className="text-white/20 text-[11px] font-medium tracking-[0.3em] uppercase">O que fazemos</p>
               </div>
 
-              <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.88] text-white mb-8">
-                NASCEMOS
+              <h2 className="font-display text-3xl sm:text-4xl leading-[1.05] tracking-tight mb-10">
+                Do conceito à entrega,
                 <br />
-                <span className="text-primary">PARA EQUIPAR</span>
-                <br />
-                HEROIS
+                <span className="text-white/40">tratamos de tudo.</span>
               </h2>
 
-              <p className="text-white/60 leading-relaxed text-lg mb-5 max-w-[55ch]">
-                Fabricamos e distribuimos equipamentos desportivos sublimados da mais alta qualidade para clubes em Portugal, Africa e PALOP.
-              </p>
-              <p className="text-white/30 leading-relaxed mb-10 max-w-[55ch]">
-                Uma equipa com anos de experiencia no sector, apostada na inovacao e na excelencia. Dispomos das mais recentes tecnologias para a fabricacao de equipamentos para todas as modalidades.
-              </p>
+              <div className="space-y-8">
+                {[
+                  {
+                    num: '01',
+                    title: 'Sublimação personalizada',
+                    desc: 'Cada equipamento é desenhado de raiz. Cores, padrões e identidade do clube — sem limites criativos.',
+                  },
+                  {
+                    num: '02',
+                    title: 'Todas as modalidades',
+                    desc: 'Futebol, futsal, basquetebol, andebol e mais. Camisolas, calções, fatos de treino e acessórios.',
+                  },
+                  {
+                    num: '03',
+                    title: 'Presença internacional',
+                    desc: 'Distribuição exclusiva para Portugal e todos os PALOP. De Lisboa a Luanda, Coimbra a Cabo Verde.',
+                  },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 + i * 0.12, duration: 0.6, ease }}
+                    className="flex gap-5"
+                  >
+                    <span className="font-display text-lg text-white/8 leading-none mt-0.5 flex-shrink-0">
+                      {item.num}
+                    </span>
+                    <div>
+                      <h3 className="font-display text-[15px] text-white/80 mb-1.5">{item.title}</h3>
+                      <p className="text-[14px] text-white/25 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
 
-              <Link
-                to="/sobre"
-                className="group inline-flex items-center gap-3 text-primary font-semibold text-sm tracking-wider hover:gap-4 transition-all duration-300"
-              >
-                <span>Conhecer a historia</span>
-                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+      {/* ═══════════════════════════════════════════════
+          PRODUCTS — featured grid
+      ═══════════════════════════════════════════════ */}
+      <section className="py-24 lg:py-32 border-t border-white/[0.04]">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+          <div className="flex items-end justify-between mb-14">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease }}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-6 h-[2px] bg-white/15" />
+                <p className="text-white/20 text-[11px] font-medium tracking-[0.3em] uppercase">Loja</p>
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Em destaque</h2>
+            </motion.div>
+            <Link to="/loja" className="hidden sm:inline-flex items-center gap-2 text-[13px] text-white/25 hover:text-white transition-colors duration-300">
+              Ver tudo <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-12">
+            {featured.map((product, i) => (
+              <ProductCard key={product.id} product={product} index={i} />
+            ))}
+          </div>
+
+          <div className="sm:hidden text-center mt-12">
+            <Link to="/loja" className="text-white/35 text-sm inline-flex items-center gap-2 hover:text-white transition-colors">
+              Ver todos os produtos <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════
+          SHOWROOM — full-width parallax image
+      ═══════════════════════════════════════════════ */}
+      <section ref={showroomRef} className="relative h-[55vh] lg:h-[70vh] overflow-hidden">
+        <motion.div style={{ y: showroomImgY }} className="absolute inset-0 -top-12 -bottom-12">
+          <img src="/image.png" alt="Showroom UIN Sports — Rio de Mouro" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-secondary/80 via-secondary/40 to-secondary/60" />
+        </motion.div>
+
+        <div className="relative z-10 h-full flex items-center">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-12 w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease }}
+              className="max-w-md"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-6 h-[2px] bg-white/20" />
+                <p className="text-white/25 text-[11px] font-medium tracking-[0.3em] uppercase">O nosso espaço</p>
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl text-white leading-tight mb-4">
+                Venha conhecer
+                <br />
+                o showroom.
+              </h2>
+              <p className="text-white/30 text-[15px] leading-relaxed mb-6">
+                Equipamento, material de treino e tudo o que precisa — tudo num só espaço em Rio de Mouro.
+              </p>
+              <Link to="/contactos">
+                <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/80 px-5 py-2.5 text-[12px] font-medium tracking-wide rounded-full hover:bg-white/20 transition-colors duration-300 border border-white/10">
+                  Como chegar <ArrowRight className="w-3.5 h-3.5" />
+                </span>
               </Link>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
-          FEATURED PRODUCTS — Horizontal scroll
-      ══════════════════════════════════════════ */}
-      <section className="py-14 lg:py-20 relative">
-        {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-secondary via-[hsl(222,47%,9%)] to-secondary" />
-
-        <div className="relative z-10">
-          {/* Header */}
-          <div className="max-w-[1400px] mx-auto px-6 sm:px-8 flex items-end justify-between mb-10">
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-6 h-[2px] bg-primary" />
-                <p className="text-primary text-[11px] font-semibold tracking-[0.35em] uppercase">Loja</p>
-              </div>
-              <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl text-white tracking-tight">EM DESTAQUE</h2>
-            </div>
-
-            <div className="hidden sm:flex items-center gap-3">
-              {/* Scroll arrows */}
-              <button
-                onClick={() => scrollProducts('left')}
-                className={`w-10 h-10 border border-white/10 flex items-center justify-center transition-all duration-300 hover:border-primary hover:text-primary active:scale-95 ${
-                  canScrollLeft ? 'text-white/50' : 'text-white/10 pointer-events-none'
-                }`}
-              >
-                <ArrowRight className="w-4 h-4 rotate-180" />
-              </button>
-              <button
-                onClick={() => scrollProducts('right')}
-                className={`w-10 h-10 border border-white/10 flex items-center justify-center transition-all duration-300 hover:border-primary hover:text-primary active:scale-95 ${
-                  canScrollRight ? 'text-white/50' : 'text-white/10 pointer-events-none'
-                }`}
-              >
-                <ArrowRight className="w-4 h-4" />
-              </button>
-              <Link
-                to="/loja"
-                className="ml-4 inline-flex items-center gap-2 text-[13px] font-semibold text-primary tracking-wider hover:gap-3 transition-all duration-300"
-              >
-                Ver tudo <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Horizontal scroll container */}
-          <div
-            ref={productsRef}
-            onScroll={checkScroll}
-            className="flex gap-4 overflow-x-auto scrollbar-hide px-6 sm:px-8 pb-4 snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      {/* ═══════════════════════════════════════════════
+          NIGHT GAME — atmospheric
+      ═══════════════════════════════════════════════ */}
+      <section className="relative h-[40vh] lg:h-[50vh] overflow-hidden">
+        <img src="/about-bg.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/30 to-secondary/50" />
+        <div className="relative z-10 h-full flex items-center justify-center text-center px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease }}
           >
-            {/* Left spacer for alignment */}
-            <div className="flex-shrink-0 w-[max(0px,calc((100vw-1400px)/2))]" />
-            {featuredProducts.map((product, i) => (
-              <div key={product.id} className="snap-start">
-                <ProductCard product={product} index={i} />
-              </div>
-            ))}
-            {/* Right spacer */}
-            <div className="flex-shrink-0 w-6 sm:w-8" />
-          </div>
-
-          {/* Mobile: "Ver tudo" link */}
-          <div className="sm:hidden text-center mt-8 px-6">
-            <Link
-              to="/loja"
-              className="inline-flex items-center gap-2 text-primary font-semibold text-sm tracking-wider"
-            >
-              Ver tudo <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+            <p className="text-white/20 text-[11px] font-medium tracking-[0.3em] uppercase mb-5">Desde 2013</p>
+            <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl text-white leading-[1.05] tracking-tight max-w-3xl mx-auto">
+              Onde há competição,
+              <br />
+              <span className="text-white/40">há UIN Sports.</span>
+            </h2>
+          </motion.div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
-          VALUES — Bold numbered statements
-      ══════════════════════════════════════════ */}
-      <section className="pt-8 lg:pt-10 pb-14 lg:pb-20 relative overflow-hidden">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8">
-          <div className="flex items-center gap-3 mb-14">
-            <div className="w-6 h-[2px] bg-primary" />
-            <p className="text-primary text-[11px] font-semibold tracking-[0.35em] uppercase">O que nos define</p>
-          </div>
+      {/* ═══════════════════════════════════════════════
+          VALUES — redesigned with more visual presence
+      ═══════════════════════════════════════════════ */}
+      <section className="py-28 lg:py-36">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease }}
+            className="mb-16"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-6 h-[2px] bg-white/15" />
+              <p className="text-white/20 text-[11px] font-medium tracking-[0.3em] uppercase">Os nossos valores</p>
+            </div>
+            <h2 className="font-display text-3xl sm:text-4xl tracking-tight">
+              O que nos define.
+            </h2>
+          </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-px bg-white/[0.04]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {[
-              { title: 'Integridade', desc: 'Na forma como agimos' },
-              { title: 'Inovacao', desc: 'Na forma como pensamos' },
-              { title: 'Win-Win', desc: 'Na forma como negociamos' },
-              { title: 'Paixao', desc: 'Na forma como trabalhamos' },
-              { title: 'Confianca', desc: 'Na forma como nos relacionamos' },
+              { title: 'Integridade', desc: 'Transparência e honestidade em cada interacção com clientes e parceiros.', highlight: true },
+              { title: 'Inovação', desc: 'Investimos nas melhores tecnologias de sublimação e processos de fabrico.', highlight: false },
+              { title: 'Win-Win', desc: 'Relações duradouras onde cada parte sai sempre a ganhar.', highlight: false },
+              { title: 'Paixão', desc: 'Pelo desporto, pela qualidade e por quem veste os nossos equipamentos.', highlight: true },
+              { title: 'Confiança', desc: 'Construída ao longo de 12 anos, projecto a projecto, entrega a entrega.', highlight: false },
             ].map((v, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08, type: 'spring', stiffness: 60, damping: 18 }}
-                className="bg-secondary p-6 lg:p-8 group hover:bg-white/[0.02] transition-colors duration-500"
+                transition={{ delay: i * 0.08, duration: 0.6, ease }}
+                className={`rounded-2xl p-7 lg:p-8 border transition-colors duration-500 ${
+                  v.highlight
+                    ? 'bg-white/[0.04] border-white/[0.08]'
+                    : 'bg-transparent border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.02]'
+                }`}
               >
-                <span className="font-display text-5xl lg:text-6xl text-white/[0.05] leading-none block mb-4 group-hover:text-primary/15 transition-colors duration-500">
+                <span className="font-display text-3xl text-white/[0.05] leading-none block mb-4">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <h3 className="font-display text-2xl text-white leading-none mb-2 tracking-wide">{v.title}</h3>
+                <h3 className="font-display text-base text-white/80 mb-2">{v.title}</h3>
                 <p className="text-[13px] text-white/25 leading-relaxed">{v.desc}</p>
               </motion.div>
             ))}
@@ -478,57 +497,56 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
-          CTA — Cinematic gradient with video still
-      ══════════════════════════════════════════ */}
-      <section className="relative py-20 lg:py-28 overflow-hidden">
-        {/* Background video (muted, subtle) */}
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover opacity-20"
-          >
-            <source src="/kling.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-secondary via-primary/20 to-secondary" />
-        </div>
+      {/* ═══════════════════════════════════════════════
+          CTA — bold
+      ═══════════════════════════════════════════════ */}
+      <section className="py-32 lg:py-40 border-t border-white/[0.04]">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, ease }}
+            >
+              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl text-white leading-[1.05] tracking-tight mb-5">
+                Pronto para equipar
+                <br />
+                <span className="text-white/40">o teu clube?</span>
+              </h2>
+              <p className="text-white/25 max-w-md mb-10 leading-relaxed text-[15px]">
+                Orçamento personalizado, sem compromisso. Do design à entrega, tratamos de tudo.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/contactos">
+                  <span className="group inline-flex items-center gap-2.5 bg-white text-secondary px-8 py-4 text-[12px] font-semibold tracking-[0.06em] rounded-full hover:bg-white/90 transition-colors duration-300">
+                    Pedir orçamento
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                  </span>
+                </Link>
+                <Link to="/loja">
+                  <span className="inline-flex items-center border border-white/12 text-white/40 px-8 py-4 text-[12px] font-semibold tracking-[0.06em] rounded-full hover:border-white/25 hover:text-white transition-all duration-300">
+                    Ver catálogo
+                  </span>
+                </Link>
+              </div>
+            </motion.div>
 
-        {/* Decorative lines */}
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[40%] h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[40%] h-[1px] bg-gradient-to-l from-transparent via-primary/20 to-transparent" />
-
-        <div className="relative z-10 max-w-[1400px] mx-auto px-6 sm:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ type: 'spring', stiffness: 40, damping: 15 }}
-          >
-            <h2 className="font-display text-6xl sm:text-8xl lg:text-9xl text-white leading-[0.88] tracking-tight mb-6">
-              EQUIPA O TEU
-              <br />
-              <span className="text-primary">CLUBE</span>
-            </h2>
-            <p className="text-white/35 max-w-lg mx-auto mb-12 text-lg leading-relaxed">
-              Orcamento personalizado para equipamentos sublimados de todas as modalidades.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to="/contactos">
-                <span className="group inline-flex items-center gap-3 bg-primary text-white px-10 py-4 font-semibold text-[13px] tracking-[0.2em] hover:bg-primary/85 transition-all duration-300 active:scale-[0.98]">
-                  PEDIR ORCAMENTO
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </span>
-              </Link>
-              <Link to="/loja">
-                <span className="inline-block border border-white/15 text-white/70 px-10 py-4 font-semibold text-[13px] tracking-[0.2em] hover:border-white/30 hover:text-white transition-all duration-300 active:scale-[0.98]">
-                  VER CATALOGO
-                </span>
-              </Link>
-            </div>
-          </motion.div>
+            {/* Jersey image on right */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.1, ease }}
+              className="hidden lg:flex justify-end"
+            >
+              <img
+                src="/kick.png"
+                alt="Jogador UIN Sports"
+                className="w-[400px] rounded-2xl"
+              />
+            </motion.div>
+          </div>
         </div>
       </section>
 

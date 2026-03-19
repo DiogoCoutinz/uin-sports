@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,38 +15,38 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 325 68% 40%;
+    --primary: 335 40% 55%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 222 47% 11%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96%;
+    --muted: 220 20% 96%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 160 84% 39%;
+    --accent: 160 50% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 325 68% 40%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 335 40% 55%;
 
-    --radius: 0.25rem;
+    --radius: 0.5rem;
 
-    --gold: 48 97% 55%;
+    --gold: 42 80% 55%;
     --gold-foreground: 222 47% 11%;
 
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 325 68% 40%;
+    --sidebar-primary: 335 40% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 217 33% 17%;
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 325 68% 40%;
+    --sidebar-ring: 335 40% 55%;
   }
 
   .dark {
@@ -59,7 +59,7 @@
     --popover: 222 47% 9%;
     --popover-foreground: 210 40% 96%;
 
-    --primary: 325 68% 45%;
+    --primary: 335 45% 62%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 217 33% 17%;
@@ -68,7 +68,7 @@
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 160 84% 39%;
+    --accent: 160 50% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 63% 31%;
@@ -76,19 +76,19 @@
 
     --border: 217 33% 17%;
     --input: 217 33% 17%;
-    --ring: 325 68% 45%;
+    --ring: 335 45% 62%;
 
-    --gold: 48 97% 55%;
+    --gold: 42 80% 55%;
     --gold-foreground: 222 47% 11%;
 
     --sidebar-background: 222 47% 6%;
     --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 325 68% 45%;
+    --sidebar-primary: 335 45% 62%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 217 33% 17%;
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 325 68% 45%;
+    --sidebar-ring: 335 45% 62%;
   }
 }
 
@@ -99,31 +99,32 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Barlow', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-weight: 700;
     text-wrap: balance;
   }
 
-  /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-weight: 700;
   }
   .font-body {
-    font-family: 'Barlow', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
-  /* Hide scrollbar utility */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -131,27 +132,9 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-
-  /* Vertical writing mode for scroll hint */
-  .writing-vertical {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-  }
 }
 
-/* ── Marquee animations ── */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-@keyframes marquee-reverse {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
-}
-
-/* ── Selection color ── */
 ::selection {
-  background: hsl(325 68% 40% / 0.35);
+  background: hsl(335 40% 55% / 0.25);
   color: white;
 }

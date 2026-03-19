@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const navLinks = [
   { label: 'Sobre', href: '/sobre' },
@@ -16,20 +16,24 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-secondary/95 backdrop-blur-md border-b border-white/[0.04]">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-secondary/95 backdrop-blur-xl border-b border-white/[0.04]">
+      <div className="max-w-[1320px] mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src="/favicon.png" alt="UIN Sports" className="w-8 h-8 rounded-full" />
-          <span className="font-display text-secondary-foreground text-xl tracking-wide">UIN SPORTS</span>
+          <img src="/image copy.png" alt="UIN Sports" className="h-7" />
+          <span className="font-display text-secondary-foreground text-sm tracking-[0.06em]">
+            SPORTS
+          </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map(link => (
+          {navLinks.map((link) => (
             <Link
               key={link.href}
               to={link.href}
-              className={`text-sm font-medium tracking-wide transition-colors hover:text-primary ${
-                location.pathname === link.href ? 'text-primary' : 'text-secondary-foreground/50'
+              className={`text-[13px] font-medium tracking-wide transition-colors duration-200 ${
+                location.pathname === link.href
+                  ? 'text-white'
+                  : 'text-white/40 hover:text-white'
               }`}
             >
               {link.label}
@@ -37,26 +41,21 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
-          <Link to="/loja">
-            <span className="hidden sm:inline-flex bg-accent text-accent-foreground px-5 py-2 text-xs font-semibold tracking-widest hover:bg-accent/90 transition-colors">
-              LOJA
-            </span>
-          </Link>
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setIsOpen(true)}
-            className="relative p-2 text-secondary-foreground/50 hover:text-primary transition-colors"
+            className="relative p-2.5 text-white/40 hover:text-white transition-colors"
           >
-            <ShoppingCart className="w-5 h-5" />
+            <ShoppingCart className="w-[18px] h-[18px]" />
             {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-0 -right-0 w-[17px] h-[17px] bg-white text-secondary text-[9px] font-bold rounded-full flex items-center justify-center">
                 {totalItems}
               </span>
             )}
           </button>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 text-secondary-foreground/50"
+            className="md:hidden p-2.5 text-white/40 hover:text-white transition-colors"
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -72,22 +71,17 @@ export default function Header() {
             transition={{ duration: 0.2 }}
             className="md:hidden bg-secondary border-t border-white/[0.04] overflow-hidden"
           >
-            <nav className="container mx-auto px-4 py-4 flex flex-col gap-3">
-              {navLinks.map(link => (
+            <nav className="max-w-[1320px] mx-auto px-6 py-5 flex flex-col gap-4">
+              {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-sm font-medium text-secondary-foreground/50 hover:text-primary py-2 tracking-wide"
+                  className="text-sm text-white/50 hover:text-white transition-colors"
                 >
                   {link.label}
                 </Link>
               ))}
-              <Link to="/loja" onClick={() => setMobileOpen(false)}>
-                <span className="inline-block w-full text-center bg-accent text-accent-foreground py-3 text-xs font-semibold tracking-widest">
-                  LOJA ONLINE
-                </span>
-              </Link>
             </nav>
           </motion.div>
         )}
