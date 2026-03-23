@@ -8,7 +8,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-4">
             <Link to="/" className="flex items-center gap-2.5 mb-4">
-              <img src="/image copy.png" alt="UIN Sports" className="h-7" />
+              <img src="/image_copy-removebg-preview.png" alt="UIN Sports" className="h-9" />
               <span className="font-display text-sm tracking-[0.06em]">SPORTS</span>
             </Link>
             <p className="text-white/25 text-sm leading-relaxed max-w-xs">

@@ -237,7 +237,7 @@ export default function ScrollReveal() {
           }}
         >
           <div style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(16px)', borderRadius: '1.5rem', padding: '2.5rem 3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-          <img src="/image copy.png" alt="UIN Sports" style={{ height: '3rem', marginBottom: '0.25rem' }} />
+          <img src="/image_copy-removebg-preview.png" alt="UIN Sports" style={{ height: '5rem', marginBottom: '0.5rem' }} />
           <p
             className="font-display"
             style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', letterSpacing: '0.25em', textTransform: 'uppercase' }}

@@ -69,7 +69,7 @@ export default function Index() {
       <header className="fixed top-0 left-0 right-0 z-50">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <img src="/image copy.png" alt="UIN Sports" className="h-8" />
+            <img src="/image_copy-removebg-preview.png" alt="UIN Sports" className="h-10" />
             <span className="font-display text-white text-sm tracking-[0.06em]">SPORTS</span>
           </Link>
           <div className="flex items-center gap-8">

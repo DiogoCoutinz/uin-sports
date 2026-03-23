@@ -19,7 +19,7 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-secondary/95 backdrop-blur-xl border-b border-white/[0.04]">
       <div className="max-w-[1320px] mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src="/image copy.png" alt="UIN Sports" className="h-7" />
+          <img src="/image_copy-removebg-preview.png" alt="UIN Sports" className="h-9" />
           <span className="font-display text-secondary-foreground text-sm tracking-[0.06em]">
             SPORTS
           </span>
